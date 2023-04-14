@@ -4,7 +4,7 @@ async function crawlPage(baseUrl, currentUrl, pages) {
   const baseUrlObj = new URL(baseUrl);
   const currentUrlObj = new URL(currentUrl);
 
-  if (baseUrlObj.hostname != currentUrlObj.hostname) {
+  if (currentUrlObj.hostname !== baseUrlObj.hostname) {
     return pages;
   }
 
@@ -15,33 +15,33 @@ async function crawlPage(baseUrl, currentUrl, pages) {
     return pages;
   }
 
-  pages[normalizeUrl] = 1;
+  pages[normalizedCurrentUrl] = 1;
 
+  let htmlBody = '';
   try {
     const res = await fetch(currentUrl);
 
-    const contentType = res.headers.get('content-type');
-
-    if (contentType.includes('text/html')) {
-      return pages;
-    }
     if (res.status > 399) {
       console.log(`error : status code${res.status}`);
       return pages;
     }
+
+    const contentType = res.headers.get('content-type');
+
+    if (!contentType.includes('text/html')) {
+      return pages;
+    }
+
+    htmlBody = await res.text();
   } catch (error) {
     console.log(`error: ${error.message}`);
-    return pages;
   }
-
-  const htmlBody = await res.text();
-
+  console.log(`crawling on ${currentUrl}`);
   const nexturls = getUrlFromHtml(htmlBody, baseUrl);
 
   for (const nexturl of nexturls) {
     pages = await crawlPage(baseUrl, nexturl, pages);
   }
-
   return pages;
 }
 
