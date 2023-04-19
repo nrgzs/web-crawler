@@ -1,4 +1,5 @@
 const { crawlPage } = require('./crawl.js');
+const fs = require('fs');
 
 async function main() {
   if (process.argv.length < 3) {
@@ -13,7 +14,13 @@ async function main() {
 
   const pages = await crawlPage(inputUrl, inputUrl, {});
   for (const page of Object.entries(pages)) {
-    console.log(page);
+    fs.writeFileSync(
+      './data.txt',
+      JSON.stringify(page, null, 4),
+
+      { flag: 'a+' },
+      'utf-8'
+    );
   }
 }
 
